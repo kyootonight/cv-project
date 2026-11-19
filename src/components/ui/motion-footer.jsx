@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ArrowUp, Copy, Check, Send } from "lucide-react";
 import ColorBends from "../colorbends";
+import { motion } from "framer-motion";
 
 const STYLES = `
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
@@ -125,6 +126,7 @@ export function CinematicFooter({
   cvUrl = "#",
   socials = [],
   contactText = "Terbuka untuk magang, kerja penuh waktu, dan project freelance.",
+  triggerKey = 0,
 }) {
   const [copied, setCopied] = useState(false);
   const isDark = theme === "dark";
@@ -143,6 +145,18 @@ export function CinematicFooter({
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const [inFooter, setInFooter] = useState(false);
+
+useEffect(() => {
+  const checkFooter = () => {
+    const distanceToBottom =
+      document.documentElement.scrollHeight - (window.scrollY + window.innerHeight);
+    setInFooter(distanceToBottom < window.innerHeight * 0.65);
+  };
+  checkFooter();
+  window.addEventListener("scroll", checkFooter, { passive: true });
+  return () => window.removeEventListener("scroll", checkFooter);
+}, []);
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
@@ -181,8 +195,31 @@ export function CinematicFooter({
           <div className="h-20 shrink-0" />
 
           {/* Center CTA & Magnetic Pills */}
-          <div className="relative z-10 flex w-full flex-1 flex-col items-center justify-center px-6 text-center">
-            <div className="mb-10 w-full max-w-4xl">
+          {/* Center CTA & Magnetic Pills */}
+          <motion.div
+            key={triggerKey}
+            initial="hidden"
+            animate={inFooter ? "visible" : "hidden"}
+            variants={{
+              hidden: {},
+              visible: { transition: { staggerChildren: 0.1, delayChildren: 0.15 } },
+            }}
+            className="relative z-10 flex w-full flex-1 flex-col items-center justify-center px-6 text-center"
+          >
+            {/* 1. Judul & Subjudul */}
+            <motion.div
+              variants={{
+                hidden: { opacity: 0, y: 30, scale: 0.95, filter: "blur(8px)" },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  scale: 1,
+                  filter: "blur(0px)",
+                  transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] },
+                },
+              }}
+              className="mb-10 w-full max-w-4xl"
+            >
               <h2
                 className={`text-5xl font-black tracking-tighter md:text-8xl ${
                   isDark ? "text-white" : "text-zinc-950"
@@ -193,73 +230,92 @@ export function CinematicFooter({
               <p className={`mx-auto mt-4 max-w-xl text-sm md:text-base ${isDark ? "text-zinc-400" : "text-zinc-600"}`}>
                 {contactText}
               </p>
-            </div>
+            </motion.div>
 
-            <div className="flex w-full max-w-4xl flex-col items-center gap-5">
-              {/* Baris Utama: Copy Email & Kirim Email */}
-              <div className="flex w-full flex-wrap items-center justify-center gap-4">
-                <MagneticButton
-                  as="button"
-                  onClick={handleCopyEmail}
-                  className={`group flex items-center gap-3 rounded-full px-8 py-4 text-sm font-bold shadow-md transition md:px-10 md:py-5 md:text-base ${
-                    isDark ? "bg-white text-black hover:bg-zinc-200" : "bg-[#00FF00] text-black hover:brightness-95"
-                  }`}
-                >
-                  {copied ? (
-                    <Check className="h-5 w-5" />
-                  ) : (
-                    <Copy className="h-5 w-5 transition-transform group-hover:scale-110" />
-                  )}
-                  {copied ? "Email Copied!" : email}
-                </MagneticButton>
+            {/* 2. Baris Tombol Email & Kirim Pesan */}
+            <motion.div
+              variants={{
+                hidden: { opacity: 0, y: 24, scale: 0.96 },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  scale: 1,
+                  transition: { type: "spring", stiffness: 260, damping: 22 },
+                },
+              }}
+              className="flex w-full flex-wrap items-center justify-center gap-4"
+            >
+              <MagneticButton
+                as="button"
+                onClick={handleCopyEmail}
+                className={`group flex items-center gap-3 rounded-full px-8 py-4 text-sm font-bold shadow-md transition md:px-10 md:py-5 md:text-base ${
+                  isDark ? "bg-white text-black hover:bg-zinc-200" : "bg-[#00FF00] text-black hover:brightness-95"
+                }`}
+              >
+                {copied ? (
+                  <Check className="h-5 w-5" />
+                ) : (
+                  <Copy className="h-5 w-5 transition-transform group-hover:scale-110" />
+                )}
+                {copied ? "Email Copied!" : email}
+              </MagneticButton>
 
+              <MagneticButton
+                as="a"
+                href={`mailto:${email}?subject=${encodeURIComponent("Halo " + fullName)}`}
+                className={`group flex items-center gap-3 rounded-full border px-8 py-4 text-sm font-bold backdrop-blur-md transition md:px-10 md:py-5 md:text-base ${
+                  isDark
+                    ? "border-white/15 bg-white/5 text-white hover:border-blue-400/50 hover:bg-white/10"
+                    : "border-black/10 bg-white/80 text-zinc-950 hover:border-green-600/50 hover:bg-green-50/90"
+                }`}
+              >
+                <Send className={`h-5 w-5 transition-transform group-hover:scale-110 ${isDark ? "text-blue-400" : "text-[#007A00]"}`} />
+                Kirim Pesan
+              </MagneticButton>
+            </motion.div>
+
+            {/* 3. Baris Sosial Media & Download CV */}
+            <motion.div
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+                },
+              }}
+              className="mt-5 flex w-full flex-wrap items-center justify-center gap-3 md:gap-4"
+            >
+              {socials.map((s) => (
                 <MagneticButton
+                  key={s.label}
                   as="a"
-                  href={`mailto:${email}?subject=${encodeURIComponent("Halo " + fullName)}`}
-                  className={`group flex items-center gap-3 rounded-full border px-8 py-4 text-sm font-bold backdrop-blur-md transition md:px-10 md:py-5 md:text-base ${
-                    isDark
-                      ? "border-white/15 bg-white/5 text-white hover:border-blue-400/50 hover:bg-white/10"
-                      : "border-black/10 bg-white/80 text-zinc-950 hover:border-green-600/50 hover:bg-green-50/90"
-                  }`}
-                >
-                  <Send className={`h-5 w-5 transition-transform group-hover:scale-110 ${isDark ? "text-blue-400" : "text-[#007A00]"}`} />
-                  Kirim Pesan
-                </MagneticButton>
-              </div>
-
-              {/* Baris Kedua: Social Links & Download CV */}
-              <div className="mt-2 flex w-full flex-wrap items-center justify-center gap-3 md:gap-4">
-                {socials.map((s) => (
-                  <MagneticButton
-                    key={s.label}
-                    as="a"
-                    href={s.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className={`rounded-full border px-6 py-3 text-xs font-semibold backdrop-blur-md transition md:text-sm ${
-                      isDark
-                        ? "border-white/10 bg-white/5 text-zinc-300 hover:border-white/25 hover:text-white"
-                        : "border-black/10 bg-white/80 text-zinc-800 hover:border-black/25 hover:text-zinc-950"
-                    }`}
-                  >
-                    {s.label} ↗
-                  </MagneticButton>
-                ))}
-                <MagneticButton
-                  as="a"
-                  href={cvUrl}
-                  download
+                  href={s.url}
+                  target="_blank"
+                  rel="noreferrer"
                   className={`rounded-full border px-6 py-3 text-xs font-semibold backdrop-blur-md transition md:text-sm ${
                     isDark
-                      ? "border-white/10 bg-white/5 text-blue-400 hover:border-blue-400/40"
-                      : "border-black/10 bg-white/80 text-[#007A00] hover:border-green-600/40"
+                      ? "border-white/10 bg-white/5 text-zinc-300 hover:border-white/25 hover:text-white"
+                      : "border-black/10 bg-white/80 text-zinc-800 hover:border-black/25 hover:text-zinc-950"
                   }`}
                 >
-                  Download CV ↓
+                  {s.label} ↗
                 </MagneticButton>
-              </div>
-            </div>
-          </div>
+              ))}
+              <MagneticButton
+                as="a"
+                href={cvUrl}
+                download
+                className={`rounded-full border px-6 py-3 text-xs font-semibold backdrop-blur-md transition md:text-sm ${
+                  isDark
+                    ? "border-white/10 bg-white/5 text-blue-400 hover:border-blue-400/40"
+                    : "border-black/10 bg-white/80 text-[#007A00] hover:border-green-600/40"
+                }`}
+              >
+                Download CV ↓
+              </MagneticButton>
+            </motion.div>
+          </motion.div>
 
           {/* Bottom Bar */}
           <div className="relative z-20 flex w-full flex-col items-center justify-between gap-5 px-6 pb-8 md:flex-row md:px-12">

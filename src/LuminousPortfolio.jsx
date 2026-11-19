@@ -16,6 +16,8 @@ import { CinematicFooter } from "./components/ui/motion-footer";
 /* ============================================================
    === EDIT DATA DI SINI — seluruh isi website diambil dari sini ===
    ============================================================ */
+
+
 const CV_DATA = {
   // --- Identitas ---
   fullName: "Jacky Yohanes",
@@ -257,12 +259,12 @@ const THEME_CSS = `
 const ease = [0.22, 1, 0.36, 1];
 const go = (id) => {
   if (id === "contact") {
+    setFooterKey((k) => k + 1);
     window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "smooth" });
     return;
   }
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 };
-
 /* ---------- Hooks ---------- */
 function useRoleTyper(words, speed = 70, hold = 1400) {
   const [i, setI] = useState(0);
@@ -626,9 +628,11 @@ function Projects() {
 }
 
 /* ---------- Halaman utama ---------- */
-export default function LuminousPortfolio() {
+
+  export default function LuminousPortfolio() {
   const [active, setActive] = useState("Home");
   const [theme, setTheme] = useState(getInitialTheme);
+  const [footerKey, setFooterKey] = useState(0);
 
   const toggle = () => setTheme((t) => {
     const next = t === "dark" ? "light" : "dark";
