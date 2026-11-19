@@ -17,7 +17,6 @@ import { CinematicFooter } from "./components/ui/motion-footer";
    === EDIT DATA DI SINI — seluruh isi website diambil dari sini ===
    ============================================================ */
 
-
 const CV_DATA = {
   // --- Identitas ---
   fullName: "Jacky Yohanes",
@@ -257,14 +256,10 @@ const THEME_CSS = `
 `;
 
 const ease = [0.22, 1, 0.36, 1];
-const go = (id) => {
-  if (id === "contact") {
-    setFooterKey((k) => k + 1);
-    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "smooth" });
-    return;
-  }
+const scrollToSection = (id) => {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 };
+
 /* ---------- Hooks ---------- */
 function useRoleTyper(words, speed = 70, hold = 1400) {
   const [i, setI] = useState(0);
@@ -338,19 +333,20 @@ function Panel({ children, className = "" }) {
 }
 
 /* ---------- Navbar ---------- */
-function Navbar({ active }) {
+function Navbar({ active, setActive, onHireClick }) {
   const [open, setOpen] = useState(false);
   const { theme, toggle } = useContext(ThemeCtx);
   const nav = (id, label) => {
-  setOpen(false);
-  if (label) setActive(label);
-  go(id);
-};
+    setOpen(false);
+    if (label) setActive?.(label);
+    scrollToSection(id);
+  };
+
   return (
     <header className="fixed inset-x-0 top-4 z-50 px-4">
       <div className="mx-auto max-w-6xl">
         <div className="flex items-center justify-between rounded-full border bd-line bg-nav px-3 py-2 shadow-xs backdrop-blur-md">
-          <button onClick={() => nav("home")} className="flex items-center gap-3 text-left">
+          <button onClick={() => nav("home", "Home")} className="flex items-center gap-3 text-left">
             <span className="grid h-10 min-w-10 place-items-center rounded-full border bd-line bg-acc-soft px-3 text-xs font-bold c-acc">{D.initials}</span>
             <span className="leading-tight">
               <span className="block text-sm font-semibold">{D.fullName}</span>
@@ -359,7 +355,7 @@ function Navbar({ active }) {
           </button>
           <nav className="hidden items-center gap-1 rounded-full bg-glass2 p-1 md:flex">
             {NAV.map((n) => (
-              <button key={n} onClick={() => nav(n.toLowerCase())} className="relative rounded-full px-4 py-1.5 text-sm font-medium">
+              <button key={n} onClick={() => nav(n.toLowerCase(), n)} className="relative rounded-full px-4 py-1.5 text-sm font-medium">
                 {active === n && <motion.span layoutId="nav-pill" className="absolute inset-0 rounded-full bg-btn shadow-xs" transition={{ type: "spring", stiffness: 380, damping: 30 }} />}
                 <span className={`relative transition-colors ${active === n ? "c-btn font-semibold" : "c-fg3 hv-fg"}`}>{n}</span>
               </button>
@@ -372,7 +368,14 @@ function Navbar({ active }) {
               duration={D.themeTransition.duration}
               className="h-10 w-10 border bd-line bg-nav transition hv-bd"
             />
-            <button onClick={() => nav("contact")} className="inline-flex items-center gap-1.5 rounded-full bg-btn px-4 py-2 text-sm font-semibold c-btn transition hv-btn">
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                onHireClick?.();
+              }}
+              className="inline-flex items-center gap-1.5 rounded-full bg-btn px-4 py-2 text-sm font-semibold c-btn transition hv-btn"
+            >
               Hire Me <ArrowUpRight size={14} />
             </button>
             <button onClick={() => setOpen(!open)} aria-label="Menu" className="grid h-10 w-10 place-items-center rounded-full border bd-line md:hidden">
@@ -385,7 +388,7 @@ function Navbar({ active }) {
             <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
               className="mt-2 grid gap-1 rounded-3xl border bd-line bg-nav p-2 shadow-lg backdrop-blur-md md:hidden">
               {NAV.map((n) => (
-                <button key={n} onClick={() => nav(n.toLowerCase())}
+                <button key={n} onClick={() => nav(n.toLowerCase(), n)}
                   className={`rounded-2xl px-4 py-2.5 text-left text-sm font-medium ${active === n ? "bg-btn c-btn font-semibold" : "c-fg3"}`}>{n}</button>
               ))}
             </motion.div>
@@ -461,7 +464,7 @@ function Hero() {
 
             <div className="mt-8 flex flex-wrap gap-3">
               <button
-                onClick={() => go("projects")}
+                onClick={() => scrollToSection("projects")}
                 className="inline-flex items-center gap-2 rounded-full bg-btn px-7 py-3.5 font-semibold c-btn shadow-sm transition hover:scale-105 hv-btn"
               >
                 <Sparkles size={18} /> Explore Projects
@@ -628,8 +631,7 @@ function Projects() {
 }
 
 /* ---------- Halaman utama ---------- */
-
-  export default function LuminousPortfolio() {
+export default function LuminousPortfolio() {
   const [active, setActive] = useState("Home");
   const [theme, setTheme] = useState(getInitialTheme);
   const [footerKey, setFooterKey] = useState(0);
@@ -639,6 +641,11 @@ function Projects() {
     try { localStorage.setItem("theme", next); } catch (e) {}
     return next;
   });
+
+  const handleHireClick = () => {
+    setFooterKey((k) => k + 1);
+    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "smooth" });
+  };
 
   const { scrollY, scrollYProgress } = useScroll();
   const gridOpacity = useTransform(
@@ -656,22 +663,22 @@ function Projects() {
   }, [theme]);
 
   useEffect(() => {
-  const onScroll = () => {
-    const marker = window.scrollY + window.innerHeight * 0.35;
-    let current = "Home";
-    for (const n of NAV) {
-      const el = document.getElementById(n.toLowerCase());
-      if (el && el.offsetTop <= marker) {
-        current = n;
+    const onScroll = () => {
+      const marker = window.scrollY + window.innerHeight * 0.35;
+      let current = "Home";
+      for (const n of NAV) {
+        const el = document.getElementById(n.toLowerCase());
+        if (el && el.offsetTop <= marker) {
+          current = n;
+        }
       }
-    }
-    setActive(current);
-  };
+      setActive(current);
+    };
 
-  onScroll();
-  window.addEventListener("scroll", onScroll, { passive: true });
-  return () => window.removeEventListener("scroll", onScroll);
-}, []);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
     <ThemeCtx.Provider value={{ theme, toggle }}>
@@ -689,7 +696,11 @@ function Projects() {
             </motion.div>
           )}
 
-          <Navbar active={active} setActive={setActive} />
+          <Navbar
+            active={active}
+            setActive={setActive}
+            onHireClick={handleHireClick}
+          />
 
           <div className="relative z-10">
             <Hero />
@@ -728,41 +739,41 @@ function Projects() {
             <Projects />
 
             <Section id="skills" title="Skills" sub="Teknologi dan kemampuan yang saya gunakan.">
-  <div className="grid gap-5 md:grid-cols-2">
-    {D.skills.map((g, i) => (
-      <Reveal key={g.group} delay={i * 0.08}>
-        <Panel className="h-full p-6">
-          <h3 className="mb-4 font-semibold">{g.group}</h3>
+              <div className="grid gap-5 md:grid-cols-2">
+                {D.skills.map((g, i) => (
+                  <Reveal key={g.group} delay={i * 0.08}>
+                    <Panel className="h-full p-6">
+                      <h3 className="mb-4 font-semibold">{g.group}</h3>
                       <motion.div
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: false, amount: 0.2 }}
-              variants={{
-                hidden: {},
-                show: { transition: { staggerChildren: 0.045, delayChildren: 0.1 } },
-              }}
-              className="flex flex-wrap gap-2"
-            >
-            {g.items.map((s) => (
-              <motion.span
-                key={s}
-                variants={{
-                  hidden: { opacity: 0, y: 12, scale: 0.85 },
-                  show: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 320, damping: 22 } },
-                }}
-                whileHover={{ y: -3, scale: 1.06 }}
-                className="cursor-default rounded-full border bd-line px-3.5 py-1.5 text-sm c-fg3 transition-colors hv-bd-acc"
-                style={GLASS}
-              >
-                {s}
-              </motion.span>
-            ))}
-          </motion.div>
-        </Panel>
-      </Reveal>
-    ))}
-  </div>
-</Section>
+                        initial="hidden"
+                        whileInView="show"
+                        viewport={{ once: false, amount: 0.2 }}
+                        variants={{
+                          hidden: {},
+                          show: { transition: { staggerChildren: 0.045, delayChildren: 0.1 } },
+                        }}
+                        className="flex flex-wrap gap-2"
+                      >
+                        {g.items.map((s) => (
+                          <motion.span
+                            key={s}
+                            variants={{
+                              hidden: { opacity: 0, y: 12, scale: 0.85 },
+                              show: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 320, damping: 22 } },
+                            }}
+                            whileHover={{ y: -3, scale: 1.06 }}
+                            className="cursor-default rounded-full border bd-line px-3.5 py-1.5 text-sm c-fg3 transition-colors hv-bd-acc"
+                            style={GLASS}
+                          >
+                            {s}
+                          </motion.span>
+                        ))}
+                      </motion.div>
+                    </Panel>
+                  </Reveal>
+                ))}
+              </div>
+            </Section>
 
             <Section id="education" title="Education" sub="Riwayat pendidikan.">
               <div className="grid gap-5 md:grid-cols-2">
@@ -790,6 +801,7 @@ function Projects() {
           cvUrl={D.cvUrl}
           socials={D.socials}
           contactText={D.contactText}
+          triggerKey={footerKey}
         />
       </div>
     </ThemeCtx.Provider>

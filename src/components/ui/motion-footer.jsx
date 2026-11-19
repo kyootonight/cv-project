@@ -129,6 +129,7 @@ export function CinematicFooter({
   triggerKey = 0,
 }) {
   const [copied, setCopied] = useState(false);
+  const [inFooter, setInFooter] = useState(false);
   const isDark = theme === "dark";
 
   const handleCopyEmail = async () => {
@@ -145,18 +146,17 @@ export function CinematicFooter({
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const [inFooter, setInFooter] = useState(false);
+  useEffect(() => {
+    const checkFooter = () => {
+      const distanceToBottom =
+        document.documentElement.scrollHeight - (window.scrollY + window.innerHeight);
+      setInFooter(distanceToBottom < window.innerHeight * 0.65);
+    };
+    checkFooter();
+    window.addEventListener("scroll", checkFooter, { passive: true });
+    return () => window.removeEventListener("scroll", checkFooter);
+  }, []);
 
-useEffect(() => {
-  const checkFooter = () => {
-    const distanceToBottom =
-      document.documentElement.scrollHeight - (window.scrollY + window.innerHeight);
-    setInFooter(distanceToBottom < window.innerHeight * 0.65);
-  };
-  checkFooter();
-  window.addEventListener("scroll", checkFooter, { passive: true });
-  return () => window.removeEventListener("scroll", checkFooter);
-}, []);
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
@@ -194,7 +194,6 @@ useEffect(() => {
 
           <div className="h-20 shrink-0" />
 
-          {/* Center CTA & Magnetic Pills */}
           {/* Center CTA & Magnetic Pills */}
           <motion.div
             key={triggerKey}
