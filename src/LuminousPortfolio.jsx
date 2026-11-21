@@ -203,7 +203,7 @@ const CV_DATA = {
 
   // --- Education ---
   education: [
-    { school: "Universitas Sultan Ageng Tirtayasa", degree: "S1 Teknik Informatika", period: "2023 – 2027", note: "4 GPA." },
+    { school: "Universitas Sultan Ageng Tirtayasa", degree: "S1 Teknik Informatika", period: "2025 – 2029", note: "4 GPA." },
     { school: "Institut Teknologi Sepuluh Nopember", degree: "S1 Teknik Telekomunikasi", period: "2023 – 2024", note: "Withdrawn from university. 3rd Place in Consulting with AI" },
     { school: "SMA Negeri 1 Kota Serang", degree: "IPA", period: "2020 – 2023", note: "1st Place in Whip-Cracking AI." },
   ],
